@@ -1,0 +1,11 @@
+Name: FrameratePatch
+Version: 0.2.0
+Icon: mod_icon
+Title: Framerate Patch
+Desc: A mod that improves the framerate.
+DLL: "FrameratePatch/bin/Debug/net452/FrameratePatch.dll"
+Dependencies:
+- Name: Quintessential
+  Version: 0.4.0
+#OptionalDependencies
+#Mappings:
