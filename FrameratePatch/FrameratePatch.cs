@@ -54,7 +54,8 @@ public class MainClass : QuintessentialMod
 	public override void PostLoad()
 	{
 		On.CompiledProgramGrid.method_855 += CompileTapeOnlyWhenNeeded;
-		On.Solution.method_1965 += RequestTapeRecompile;
+		On.SolutionEditorScreen.method_48 += RequestTapeRecompileAfterOpeningNewSolutionEditorScreen;
+		On.Solution.method_1965 += RequestTapeRecompileAfterSavingSolution;
 
 		IL.SolutionEditorProgramPanel.method_221 += ModifyProgramPanel_method_221;
 	}
@@ -64,33 +65,29 @@ public class MainClass : QuintessentialMod
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// improve framerate by: only compiling the instruction tape when necessary
 
-	private static string storedID = "";
 	private static Maybe<CompiledProgramGrid> storedCPG;
 	private static bool updateStoredCPG = true;
 
-	private static void RequestTapeRecompile(On.Solution.orig_method_1965 orig, Solution solution_self)
+	private static void RequestTapeRecompileAfterSavingSolution(On.Solution.orig_method_1965 orig, Solution solution_self)
 	{
 		orig(solution_self);
 		updateStoredCPG = true;
 	}
 
-	private static string get_CPG_ID(Solution solution)
+	private static void RequestTapeRecompileAfterOpeningNewSolutionEditorScreen(On.SolutionEditorScreen.orig_method_48 orig, SolutionEditorScreen ses_self)
 	{
-		string solutionID = solution.field_3915;
-		Puzzle puzzle = solution.method_1934();
-		string puzzleID = puzzle.field_2766;
-		return solutionID + puzzleID;
+		orig(ses_self);
+		updateStoredCPG = true;
 	}
 
 	private static Maybe<CompiledProgramGrid> CompileTapeOnlyWhenNeeded(On.CompiledProgramGrid.orig_method_855 orig, Solution solution)
 	{
 		//if (!saveFramerate) return orig(solution);
 
-		if (updateStoredCPG || storedID != get_CPG_ID(solution))
+		if (updateStoredCPG)
 		{
-			storedID = get_CPG_ID(solution);
-			updateStoredCPG = false;
 			storedCPG = orig(solution);
+			updateStoredCPG = false;
 		}
 
 		return storedCPG;
