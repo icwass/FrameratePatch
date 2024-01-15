@@ -54,7 +54,6 @@ public class MainClass : QuintessentialMod
 	public override void PostLoad()
 	{
 		On.CompiledProgramGrid.method_855 += CompileTapeOnlyWhenNeeded;
-		On.SolutionEditorScreen.method_48 += RequestTapeRecompileAfterOpeningNewSolutionEditorScreen;
 		On.Solution.method_1965 += RequestTapeRecompileAfterSavingSolution;
 
 		IL.SolutionEditorProgramPanel.method_221 += ModifyProgramPanel_method_221;
@@ -65,32 +64,32 @@ public class MainClass : QuintessentialMod
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// improve framerate by: only compiling the instruction tape when necessary
 
-	private static Maybe<CompiledProgramGrid> storedCPG;
-	private static bool updateStoredCPG = true;
+	const string StoredCPGField = "FrameratePatch_StoredCPG";
+	const string UpdateCPGField = "FrameratePatch_UpdateCPG";
 
 	private static void RequestTapeRecompileAfterSavingSolution(On.Solution.orig_method_1965 orig, Solution solution_self)
 	{
 		orig(solution_self);
-		updateStoredCPG = true;
-	}
 
-	private static void RequestTapeRecompileAfterOpeningNewSolutionEditorScreen(On.SolutionEditorScreen.orig_method_48 orig, SolutionEditorScreen ses_self)
-	{
-		orig(ses_self);
-		updateStoredCPG = true;
+		var solution_dyn = new DynamicData(solution_self);
+		solution_dyn.Set(UpdateCPGField, true);
 	}
 
 	private static Maybe<CompiledProgramGrid> CompileTapeOnlyWhenNeeded(On.CompiledProgramGrid.orig_method_855 orig, Solution solution)
 	{
 		//if (!saveFramerate) return orig(solution);
 
-		if (updateStoredCPG)
+		var solution_dyn = new DynamicData(solution);
+		var data = solution_dyn.Get(StoredCPGField);
+
+		if (data == null || solution_dyn.Get<bool>(UpdateCPGField))
 		{
-			storedCPG = orig(solution);
-			updateStoredCPG = false;
+			data = orig(solution);
+			solution_dyn.Set(StoredCPGField, data);
+			solution_dyn.Set(UpdateCPGField, false);
 		}
 
-		return storedCPG;
+		return (Maybe<CompiledProgramGrid>) data;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
