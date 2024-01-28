@@ -160,7 +160,7 @@ public class MainClass : QuintessentialMod
 		{
 			int programDelay = program.field_2366;
 			int xlimit = ForLoopIteratorStart_Instructions(sepp_self) - programDelay;
-			return Math.Min(xlimit + 50, programWidth);
+			return Math.Min(xlimit + 100, programWidth);
 		});
 
 
